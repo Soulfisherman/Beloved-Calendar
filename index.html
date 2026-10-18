@@ -11,7 +11,21 @@
 
 .topbar .btn{padding:9px 12px;font-size:12px}.modal{position:fixed;inset:0;background:rgba(13,31,25,.58);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}.modal.hidden{display:none!important}.modal-card{position:relative;background:white;border-radius:18px;padding:26px;width:min(100%,520px);max-height:calc(100vh - 36px);overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.22)}.modal-card h3{margin:0 35px 8px 0;font-size:22px}.modal-card p{font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 20px}.modal-close{position:absolute;right:16px;top:13px;border:0;background:#f1f5f2;border-radius:10px;width:34px;height:34px;font-size:23px;color:var(--ink)}.modal-card form{display:grid;gap:13px}.modal-card label{display:grid;gap:6px;font-size:12px;color:var(--muted);font-weight:700}.modal-card input,.modal-card select,.modal-card textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--ink);background:white;font:inherit;font-weight:400}.modal-card textarea{resize:vertical}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-error{color:#a33a32;font-size:12px;line-height:1.4}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}.event-actions{display:flex;gap:6px;margin-top:12px}.event-actions button{font-size:11px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:white;color:var(--ink)}.event-actions .delete-event{color:#a33a32}.db-pill{display:inline-block;background:#e4f2eb;color:#22604b;border-radius:6px;font-size:9px;padding:4px 6px;margin-left:5px}@media(max-width:520px){.modal-card{padding:22px 17px}.form-grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.topbar>div:last-child{gap:6px}}
 </style></head><body>
-<header class="topbar"><div class="brand"><div class="logo">B</div><div><h1>Beloved Calendar</h1><p>Church of the Beloved · COTB</p></div></div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end"><div class="top-pill">DUTY ROSTER & CHURCH EVENTS</div><button class="btn" id="loginBtn" type="button">Editor sign in</button><button class="btn primary hidden" id="addEventBtn" type="button">+ Add event</button><button class="btn hidden" id="logoutBtn" type="button">Sign out</button></div></header>
+<header class="topbar">
+  <div class="brand">
+    <img src="Logo_Beloved.png" alt="Church of the Beloved logo" class="church-logo">
+    <div>
+      <h1>Beloved Calendar</h1>
+      <p>Church of the Beloved · COTB</p>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+    <div class="top-pill">DUTY ROSTER & CHURCH EVENTS</div>
+    <button class="btn" id="loginBtn" type="button">Editor sign in</button>
+    <button class="btn primary hidden" id="addEventBtn" type="button">+ Add event</button>
+    <button class="btn hidden" id="logoutBtn" type="button">Sign out</button>
+  </div>
+</header>
 <main class="wrap"><section class="hero"><div><div class="eyebrow">One calendar · Everyone in sync</div><h2>See who's on duty.</h2><p>A simple visual overview of services, worship teams, prayer meetings and church events.</p></div><div class="today"><span>TODAY</span><strong id="todayLabel">—</strong></div></section>
 <section class="stats" id="stats"></section>
 <div class="toolbar"><div class="search"><span>⌕</span><input id="search" placeholder="Search people, duties, places…" aria-label="Search schedules"></div><select id="category"><option value="All">All schedules</option><option>Service</option><option>Worship Team</option><option>Prayer Meeting</option><option>Event</option></select><button class="btn" id="todayBtn">Today</button></div>
