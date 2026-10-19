@@ -121,8 +121,28 @@ const WORSHIP_DUTY_KEYS=['Worship leader (رێڤەبەریا پەرستنێ)','V
 const PRAYER_DUTY_KEYS=['Leader (رێڤەبەر)'];
 function dutyKeysFor(cat){if(cat==='Service')return SERVICE_DUTY_KEYS;if(cat==='Worship Team')return WORSHIP_DUTY_KEYS;if(cat==='Prayer Meeting')return PRAYER_DUTY_KEYS;return [];}
 function buildDutyFields(cat,row){const box=$('dutyFields');const keys=dutyKeysFor(cat);box.innerHTML=keys.map(k=>{const id='duty_'+k.replace(/[^a-zA-Z0-9]/g,'_');const val=row?(row[k]||''):'';const lab=labelMap[k]||k;return `<label data-duty-key="${esc(k)}">${esc(lab)}<input id="${id}" data-key="${esc(k)}" maxlength="120" value="${esc(val)}" placeholder="Name / person"></label>`;}).join('');const titleWrap=$('eventTitleWrap');if(cat==='Event'){titleWrap.style.display='';$('eventTitle').required=true;}else{titleWrap.style.display=cat==='Service'||cat==='Worship Team'?'none':'';$('eventTitle').required=false;}}
-function openEventEditor(row=null){if(!isEditor){setStatus('Please sign in with an authorized editor account first.');return;} $('eventError').textContent='';$('eventModalTitle').textContent=row?'Edit church event':'Add church event';$('eventId').value=row?row._supabaseId:'';const cat=row?(row._dbType||row._category||'Service'):'Service';$('eventType').value=cat;$('eventDate').value=row?(row._date||''):selectedISO;$('eventStart').value=(row&&row._startAt)?new Date(row._startAt).toISOString().slice(11,16):'';$('eventEnd').value=(row&&row._endAt)?new Date(row._endAt).toISOString().slice(11,16):'';$('eventLocation').value=row?(row.Location||''):'';$('eventTitle').value=row?(row.Type||''):'';$('eventNotes').value=row?(row.Notes||''):'';buildDutyFields(cat,row);openModal('eventModal');}
-$('eventType').addEventListener('change',()=>buildDutyFields($('eventType').value,null));
+function openEventEditor(row=null){if(!isEditor){setStatus('Please sign in with an authorized editor account first.');return;} $('eventError').textContent='';$('eventModalTitle').textContent=row?'Edit church event':'Add church event';$('eventId').value=row?row._supabaseId:'';const cat=row?(row._dbType||row._category||'Service'):'Service';$('eventType').value=cat;$('eventDate').value=row?(row._date||''):selectedISO;
+const isServiceOrWorship = cat==='Service'||cat==='Worship Team';
+if(row&&row._startAt){$('eventStart').value=new Date(row._startAt).toISOString().slice(11,16);}
+else if(isServiceOrWorship){$('eventStart').value='11:00';}
+else{$('eventStart').value='';}
+if(row&&row._endAt){$('eventEnd').value=new Date(row._endAt).toISOString().slice(11,16);}
+else if(isServiceOrWorship){$('eventEnd').value='12:30';}
+else{$('eventEnd').value='';}
+if(row&&row.Location){$('eventLocation').value=row.Location;}
+else if(isServiceOrWorship){$('eventLocation').value='Beloved Church - Praise Chapel Church';}
+else{$('eventLocation').value='';}
+$('eventTitle').value=row?(row.Type||''):'';$('eventNotes').value=row?(row.Notes||''):'';buildDutyFields(cat,row);openModal('eventModal');}
+$('eventType').addEventListener('change',()=>{
+  const cat=$('eventType').value;
+  buildDutyFields(cat,null);
+  const isServiceOrWorship = cat==='Service'||cat==='Worship Team';
+  if(isServiceOrWorship){
+    if(!$('eventStart').value)$('eventStart').value='11:00';
+    if(!$('eventEnd').value)$('eventEnd').value='12:30';
+    if(!$('eventLocation').value)$('eventLocation').value='Beloved Church - Praise Chapel Church';
+  }
+});
 $('addEventBtn').addEventListener('click',()=>openEventEditor());
 document.addEventListener('click',async e=>{const edit=e.target.closest('[data-edit-event]');if(edit){const row=DB_DATA.find(x=>x._supabaseId===edit.dataset.editEvent);if(row)openEventEditor(row);return;}const del=e.target.closest('[data-delete-event]');if(del){if(!isEditor)return;if(!confirm('Delete this shared event? This cannot be undone.'))return;const {error}=await supabaseClient.from('events').delete().eq('id',del.dataset.deleteEvent);if(error){setStatus('Delete failed: '+error.message);return;}await loadDbEvents();setStatus('Event deleted.');}});
 $('eventForm').addEventListener('submit',async e=>{e.preventDefault();$('eventError').textContent='';if(!isEditor){$('eventError').textContent='This account does not have editor permission.';return;}const date=$('eventDate').value;const start=$('eventStart').value;const end=$('eventEnd').value;const startAt=date?(start?`${date}T${start}:00`:date+'T12:00:00'):null;const endAt=date?(end?`${date}T${end}:00`:null):null;if(start&&end&&end<start){$('eventError').textContent='End time must be after start time.';return;}const cat=$('eventType').value;const dutyLines=[];document.querySelectorAll('#dutyFields input[data-key]').forEach(inp=>{const v=inp.value.trim();if(v)dutyLines.push(inp.dataset.key+': '+v);});let freeNotes=$('eventNotes').value.trim();let notesPayload='';if(dutyLines.length){notesPayload='__DUTIES__\n'+dutyLines.join('\n');if(freeNotes)notesPayload+='\n__NOTES__\n'+freeNotes;}else{notesPayload=freeNotes||null;}let title=$('eventTitle').value.trim();if(!title){if(cat==='Service')title='Friday service';else if(cat==='Worship Team')title='Worship team';else if(cat==='Prayer Meeting')title='Prayer meeting';else title='Church event';}const payload={title:title,event_type:cat,start_at:startAt,end_at:endAt,location:$('eventLocation').value.trim()||null,notes:notesPayload};const id=$('eventId').value;const result=id?await supabaseClient.from('events').update(payload).eq('id',id):await supabaseClient.from('events').insert(payload);if(result.error){$('eventError').textContent=result.error.message;return;}closeModal('eventModal');await loadDbEvents();setStatus(id?'Event updated and shared.':'Event added and shared.');});
