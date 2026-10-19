@@ -55,8 +55,31 @@ const DATA=[];
 const CAT_ORDER=['Service','Worship Team','Prayer Meeting','Event'];
 const DATE_KEYS=['Date (روژ)','Date'];
 const pretty={Service:'Service schedule', 'Worship Team':'Worship team schedule','Prayer Meeting':'Prayer meeting',Event:'Church event'};
-const fields={Service:['Location','(گوتار) Preaching','Congregational prayer (نڤێژکرنا جڤاکێ)','Powerpoint/ Sound (پەور پوینت)','Music','Kurdish scripture/prayer (خواندنا ب کوردی و نڤێژ)','English scripture read','Passage (پەرتووکێ)','Translation (تەرجومە)','Communion lead (رێڤەبەریا شیڤا خودانی)','Communion prep (ئامادەبوونا شیڤا خودانی)','Snacks/Fruit (خوارنا سفک/فێقی)','Kitchen setup (ئامادەبوونا مەتبەخێ)','Clean-up (پاقژ کرن)','Notes'], 'Worship Team':['Location','Worship leader','Vocal','Guitar','Flute','Keyboard','Drum','Presider','Apostles\' Creed','Notes'],'Prayer Meeting':['Location','Leader','Notes'],'Event':['Type','Location','Notes']};
-const labelMap={'Music':'Music','Congregational prayer (نڤێژکرنا جڤاکێ)':'Congregational prayer','Powerpoint/ Sound (پەور پوینت)':'PowerPoint / Sound','Music (رێڤەبەریا سروودا)':'Music (leader)','Kurdish scripture/prayer (خواندنا ب کوردی و نڤێژ)':'Kurdish scripture / prayer','English scripture read':'English scripture read','(گوتار) Preaching':'Preaching','Passage (پەرتووکێ)':'Passage','Translation (تەرجومە)':'Translation','Communion lead (رێڤەبەریا شیڤا خودانی)':'Communion lead','Communion prep (ئامادەبوونا شیڤا خودانی)':'Communion preparation','Snacks/Fruit (خوارنا سفک/فێقی)':'Snacks / fruit','Kitchen setup (ئامادەبوونا مەتبەخێ)':'Kitchen setup','Clean-up (پاقژ کرن)':'Clean-up','Worship leader':'Worship leader','Apostles\' Creed':'Apostles\' Creed'};
+const fields={Service:['Location','(گوتار) Preaching','Congregational prayer (نڤێژکرنا جڤاکێ)','PowerPoint / Sound (پەوەرپۆینت و دەنگ)','Music (سروود)','Kurdish scripture / prayer (خواندنا ب کوردی و نڤێژ)','English scripture read (خواندنا پەرتووکێ ب ئینگلیزی)','Passage (پەرتووکێ)','Translation (تەرجومە)','Communion lead (رێڤەبەریا شیڤا خودانی)','Communion preparation (ئامادەبوونا شیڤا خودانی)','Snacks / fruit (خوارنا سفک / فێقی)','Kitchen setup (ئامادەبوونا مەتبەخێ)','Clean-up (پاقژکرن)','Notes'], 'Worship Team':['Location','Worship leader (رێڤەبەریا پەرستنێ)','Vocal (دەنگ)','Guitar (گیتار)','Flute (فلوت)','Keyboard (کیبۆرد)','Drum (دەهۆل)','Presider (سەرپەرشتیار)','Apostles\' Creed (باوەریا نێرینان)','Notes'],'Prayer Meeting':['Location','Leader (رێڤەبەر)','Notes'],'Event':['Type','Location','Notes']};
+const labelMap={
+'(گوتار) Preaching':'Preaching (گوتار)',
+'Congregational prayer (نڤێژکرنا جڤاکێ)':'Congregational prayer (نڤێژکرنا جڤاکێ)',
+'PowerPoint / Sound (پەوەرپۆینت و دەنگ)':'PowerPoint / Sound (پەوەرپۆینت و دەنگ)',
+'Music (سروود)':'Music (سروود)',
+'Kurdish scripture / prayer (خواندنا ب کوردی و نڤێژ)':'Kurdish scripture / prayer (خواندنا ب کوردی و نڤێژ)',
+'English scripture read (خواندنا پەرتووکێ ب ئینگلیزی)':'English scripture read (خواندنا پەرتووکێ ب ئینگلیزی)',
+'Passage (پەرتووکێ)':'Passage (پەرتووکێ)',
+'Translation (تەرجومە)':'Translation (تەرجومە)',
+'Communion lead (رێڤەبەریا شیڤا خودانی)':'Communion lead (رێڤەبەریا شیڤا خودانی)',
+'Communion preparation (ئامادەبوونا شیڤا خودانی)':'Communion preparation (ئامادەبوونا شیڤا خودانی)',
+'Snacks / fruit (خوارنا سفک / فێقی)':'Snacks / fruit (خوارنا سفک / فێقی)',
+'Kitchen setup (ئامادەبوونا مەتبەخێ)':'Kitchen setup (ئامادەبوونا مەتبەخێ)',
+'Clean-up (پاقژکرن)':'Clean-up (پاقژکرن)',
+'Worship leader (رێڤەبەریا پەرستنێ)':'Worship leader (رێڤەبەریا پەرستنێ)',
+'Vocal (دەنگ)':'Vocal (دەنگ)',
+'Guitar (گیتار)':'Guitar (گیتار)',
+'Flute (فلوت)':'Flute (فلوت)',
+'Keyboard (کیبۆرد)':'Keyboard (کیبۆرد)',
+'Drum (دەهۆل)':'Drum (دەهۆل)',
+'Presider (سەرپەرشتیار)':'Presider (سەرپەرشتیار)',
+'Apostles\' Creed (باوەریا نێرینان)':'Apostles\' Creed (باوەریا نێرینان)',
+'Leader (رێڤەبەر)':'Leader (رێڤەبەر)'
+};
 const parseISO=s=>s?new Date(s+'T12:00:00'):null;
 const today=new Date();today.setHours(0,0,0,0);
 let viewDate=new Date(today.getFullYear(),today.getMonth(),1), selectedISO=today.toISOString().slice(0,10);
@@ -93,9 +116,9 @@ async function refreshAuth(){if(!supabaseClient)return;const {data}=await supaba
 $('loginBtn').addEventListener('click',()=>{$('authError').textContent='';if(!supabaseClient){setStatus('Sign-in is unavailable because the Supabase client did not load. Refresh the page; if this continues, check the Supabase CDN script and browser console.');return;}openModal('authModal')});
 $('logoutBtn').addEventListener('click',async()=>{const {error}=await supabaseClient.auth.signOut();if(error){setStatus('Sign out failed: '+error.message);return;}currentUser=null;isEditor=false;await loadDbEvents();updateAuthUI();});
 $('authForm').addEventListener('submit',async e=>{e.preventDefault();$('authError').textContent='';if(!supabaseClient){$('authError').textContent='Supabase did not initialize. Refresh the page. If it continues, check that the Supabase JavaScript library loaded.';return;}const submitButton=$('authForm').querySelector('button[type=submit]');submitButton.disabled=true;submitButton.textContent='Signing in…';try{const {data,error}=await supabaseClient.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(error){$('authError').textContent=error.message;return;}currentUser=data.user;await refreshAuth();closeModal('authModal');if(!isEditor)setStatus('You signed in successfully, but this account is not authorized to edit the calendar.');}catch(err){$('authError').textContent='Sign-in failed: '+(err?.message||String(err));}finally{submitButton.disabled=false;submitButton.textContent='Sign in';}});
-const SERVICE_DUTY_KEYS=['(گوتار) Preaching','Congregational prayer (نڤێژکرنا جڤاکێ)','Powerpoint/ Sound (پەور پوینت)','Music','Kurdish scripture/prayer (خواندنا ب کوردی و نڤێژ)','English scripture read','Passage (پەرتووکێ)','Translation (تەرجومە)','Communion lead (رێڤەبەریا شیڤا خودانی)','Communion prep (ئامادەبوونا شیڤا خودانی)','Snacks/Fruit (خوارنا سفک/فێقی)','Kitchen setup (ئامادەبوونا مەتبەخێ)','Clean-up (پاقژ کرن)'];
-const WORSHIP_DUTY_KEYS=['Worship leader','Vocal','Guitar','Flute','Keyboard','Drum','Presider','Apostles\' Creed'];
-const PRAYER_DUTY_KEYS=['Leader'];
+const SERVICE_DUTY_KEYS=['(گوتار) Preaching','Congregational prayer (نڤێژکرنا جڤاکێ)','PowerPoint / Sound (پەوەرپۆینت و دەنگ)','Music (سروود)','Kurdish scripture / prayer (خواندنا ب کوردی و نڤێژ)','English scripture read (خواندنا پەرتووکێ ب ئینگلیزی)','Passage (پەرتووکێ)','Translation (تەرجومە)','Communion lead (رێڤەبەریا شیڤا خودانی)','Communion preparation (ئامادەبوونا شیڤا خودانی)','Snacks / fruit (خوارنا سفک / فێقی)','Kitchen setup (ئامادەبوونا مەتبەخێ)','Clean-up (پاقژکرن)'];
+const WORSHIP_DUTY_KEYS=['Worship leader (رێڤەبەریا پەرستنێ)','Vocal (دەنگ)','Guitar (گیتار)','Flute (فلوت)','Keyboard (کیبۆرد)','Drum (دەهۆل)','Presider (سەرپەرشتیار)','Apostles\' Creed (باوەریا نێرینان)'];
+const PRAYER_DUTY_KEYS=['Leader (رێڤەبەر)'];
 function dutyKeysFor(cat){if(cat==='Service')return SERVICE_DUTY_KEYS;if(cat==='Worship Team')return WORSHIP_DUTY_KEYS;if(cat==='Prayer Meeting')return PRAYER_DUTY_KEYS;return [];}
 function buildDutyFields(cat,row){const box=$('dutyFields');const keys=dutyKeysFor(cat);box.innerHTML=keys.map(k=>{const id='duty_'+k.replace(/[^a-zA-Z0-9]/g,'_');const val=row?(row[k]||''):'';const lab=labelMap[k]||k;return `<label data-duty-key="${esc(k)}">${esc(lab)}<input id="${id}" data-key="${esc(k)}" maxlength="120" value="${esc(val)}" placeholder="Name / person"></label>`;}).join('');const titleWrap=$('eventTitleWrap');if(cat==='Event'){titleWrap.style.display='';$('eventTitle').required=true;}else{titleWrap.style.display=cat==='Service'||cat==='Worship Team'?'none':'';$('eventTitle').required=false;}}
 function openEventEditor(row=null){if(!isEditor){setStatus('Please sign in with an authorized editor account first.');return;} $('eventError').textContent='';$('eventModalTitle').textContent=row?'Edit church event':'Add church event';$('eventId').value=row?row._supabaseId:'';const cat=row?(row._dbType||row._category||'Service'):'Service';$('eventType').value=cat;$('eventDate').value=row?(row._date||''):selectedISO;$('eventStart').value=(row&&row._startAt)?new Date(row._startAt).toISOString().slice(11,16):'';$('eventEnd').value=(row&&row._endAt)?new Date(row._endAt).toISOString().slice(11,16):'';$('eventLocation').value=row?(row.Location||''):'';$('eventTitle').value=row?(row.Type||''):'';$('eventNotes').value=row?(row.Notes||''):'';buildDutyFields(cat,row);openModal('eventModal');}
